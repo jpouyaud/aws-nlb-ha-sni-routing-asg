@@ -6,7 +6,7 @@ sudo rm nginx-asg-sync-0.4-1.amzn2.x86_64.rpm
 sudo nginx -s reload
 
 cat > /tmp/config.yaml <<EOF
-region: eu-west-2
+region: eu-west-3
 api_endpoint: http://127.0.0.1:8080/api
 sync_interval_in_seconds: 1
 cloud_provider: AWS
