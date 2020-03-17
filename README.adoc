@@ -6,6 +6,12 @@
 
 This Lab will run an NGINX Plus demo environment over the AWS region you want.
 
+The prefered region is eu-west-3 (Paris) for performance consideration, reason is the nodal AMI used are stored in this region.
+
+If you choose another region, Packer will first generate the child AMI on eu-west-3 and will clone it to your region of choice, which is consuming more time.
+
+You can reduce this time by generating your own nodal AMI in your region of choice an modify /packer/packer.json accordingly.
+
 We are using most of the code shared here https://github.com/Nginxinc/Nginx-Demos/tree/master/aws-nlb-ha-asg
 
 The purpose is to demonstrate an active/active NGINX Plus cluster doing SNI routing in Path Through mode.
@@ -167,6 +173,12 @@ Your inventory ==> /hosts.yaml
 
 connect manually ssh to ng1 and ng2 by using your AWS private key
 
+Before to go further, it's the perfect time to have a look on the Nginx Plus Dashboard on connecting on one of the two public IP @:
+
+http://NGINX PLUS instance1:8080/dashboard.html
+
+You will see two upstream for app_one an app_two
+
 You can now Push the new configuration of the NGINX Plus cluster with
 
 ----
@@ -214,6 +226,10 @@ you should see a stream config like this
 ----
 
 You can now check that https://appthree.Nginxlab.fr is working !
+
+If you give a look at http://NGINX PLUS instance1:8080/dashboard.html
+
+you will see the new upstream for app_three automatically discovered and configured by the Nginx-asg-sync agent
 
 ===  Upcoming improvements:
 ****

@@ -9,6 +9,7 @@
     - "{{ playbook_dir }}/ansible/vars.yaml"
 
   tasks:
+    
   - name: Launch cleanup.sh script
     script: "{{ playbook_dir }}/script/cleanup.sh"
     register: out

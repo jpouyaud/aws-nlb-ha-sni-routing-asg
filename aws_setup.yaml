@@ -9,10 +9,26 @@
     - "{{ playbook_dir }}/ansible/vars.yaml"
 
   tasks:
+
+  - name: creating config_v1.yaml
+    template:
+      src: "{{ playbook_dir }}/conf/config_v1.j2"
+      dest: "{{ playbook_dir }}/conf/config_v1.yaml"
+
+  - name: creating config_v2.yaml
+    template:
+      src: "{{ playbook_dir }}/conf/config_v2.j2"
+      dest: "{{ playbook_dir }}/conf/config_v2.yaml"
+
   - name: creating setup-instance.sh
     template:
       src: "{{ playbook_dir }}/packer/setup-instance.j2"
       dest: "{{ playbook_dir }}/packer/setup-instance.sh"
+
+  - name: creating cleanup.sh
+    template:
+      src: "{{ playbook_dir }}/script/cleanup.j2"
+      dest: "{{ playbook_dir }}/script/cleanup.sh"      
 
 
   - name: Launch setup.sh script
