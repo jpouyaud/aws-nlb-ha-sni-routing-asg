@@ -8,7 +8,7 @@ ws:
 
   ec2:
 
-    region: eu-west-2
+    region: eu-west-3
     key_name: Jacques
     machines:
       ngx:
