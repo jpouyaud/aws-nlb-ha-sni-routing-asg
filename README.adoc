@@ -6,7 +6,7 @@
 
 This Lab will run an NGINX Plus demo environment over the AWS region you want.
 
-The prefered region is eu-west-3 (Paris) for performance consideration, reason is the nodal AMI used are stored in this region.
+The prefered region is eu-west-3 (Paris) for performance consideration, reason is nodal AMI used are stored in this region.
 
 If you choose another region, Packer will first generate the child AMI on eu-west-3 and will clone it to your region of choice, which is consuming more time.
 
