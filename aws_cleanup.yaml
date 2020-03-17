@@ -9,10 +9,10 @@
     - "{{ playbook_dir }}/ansible/vars.yaml"
 
   tasks:
-    
+
   - name: Launch cleanup.sh script
     script: "{{ playbook_dir }}/script/cleanup.sh"
-    register: out
+
     environment:
       AWS_ACCESS_KEY_ID: "{{ ws.aws_access_key }}"
       AWS_ACCESS_KEY: "{{ ws.aws_access_key }}"
@@ -24,5 +24,3 @@
       TF_VAR_key_name: "{{ ws.ec2.key_name }}"
       TF_VAR_machine_type: "{{ ws.ec2.machines.ngx.type }}"
       AWS_DEFAULT_REGION: "{{ ws.ec2.region }}"
-
-  - debug: var=out.stdout_lines

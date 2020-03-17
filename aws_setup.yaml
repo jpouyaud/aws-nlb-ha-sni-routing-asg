@@ -28,12 +28,18 @@
   - name: creating cleanup.sh
     template:
       src: "{{ playbook_dir }}/script/cleanup.j2"
-      dest: "{{ playbook_dir }}/script/cleanup.sh"      
+      dest: "{{ playbook_dir }}/script/cleanup.sh"
+    when: ws.ec2.region == "eu-west-3"
 
+  - name: creating cleanup.sh
+    template:
+      src: "{{ playbook_dir }}/script/cleanup_diff.j2"
+      dest: "{{ playbook_dir }}/script/cleanup.sh"
+    when: ws.ec2.region != "eu-west-3"
 
   - name: Launch setup.sh script
     script: "{{ playbook_dir }}/script/setup.sh"
-    register: out
+
     environment:
       AWS_ACCESS_KEY_ID: "{{ ws.aws_access_key }}"
       AWS_ACCESS_KEY: "{{ ws.aws_access_key }}"
@@ -45,5 +51,3 @@
       TF_VAR_key_name: "{{ ws.ec2.key_name }}"
       TF_VAR_machine_type: "{{ ws.ec2.machines.ngx.type }}"
       AWS_DEFAULT_REGION: "{{ ws.ec2.region }}"
-
-  - debug: var=out.stdout_lines
