@@ -1,0 +1,222 @@
+== All Active Auto Scaling Demo Environment AWS NLB / NGINX Plus / NGINX OSS associated to an SNI Routing Path Through use case
+:showtitle:
+:toc: left
+
+== Overview
+
+This Lab will run an NGINX Plus demo environment over the AWS region you want.
+
+We are using most of the code shared here https://github.com/Nginxinc/Nginx-Demos/tree/master/aws-nlb-ha-asg
+
+The purpose is to demonstrate an active/active NGINX Plus cluster doing SNI routing in Path Through mode.
+
+Schema:
+
+----
+AWS NLB ==> Autoscaling group 2x NGINX Plus ==> Backend NGINX OSS (2x App_One, 2x App_Two, 2x App_Three)
+----
+
+SNI routing means the NGINX Plus look at the SNI information given at the SSL session initialization.
+Based on this information NGINX route the SSL session following the mapping below:
+----
+  SNI appone.Nginxlab.fr ==> App_One Nginx OSS cluster
+  SNI apptwo.Nginxlab.fr ==> App_One Nginx OSS cluster
+  SNI appthree.Nginxlab.fr ==> App_One Nginx OSS cluster
+----
+
+NGINX Plus allow to workaround the current AWS limitation of 25 Certificate per LB
+https://docs.aws.amazon.com/elasticloadbalancing/latest/application/load-balancer-limits.html
+
+This way, the SSL session can be terminated on the NGINX Plus layer or the backend one.
+For this Lab the SSL session is terminated on the backend layer.
+
+To facilitate the lab build stage we use a self-signed wildcard certificate with the CN: *.Nginxlab.fr
+
+The NGINX Plus cluster is doing TCP Load balancing (Stream) with an hashing algorithm on the client IP source to preserve session persistence.
+
+To facilitate the integration with AWS API we use our Nginx-asg-sync agent.
+https://github.com/Nginxinc/Nginx-asg-sync
+
+Nginx-asg-sync allows NGINX Plus to discover instances (virtual machines) of a scaling group of a cloud provider. The following providers are supported:
+----
+    -AWS Auto Scaling groups https://aws.amazon.com/fr/autoscaling/
+    -Azure Virtual Machine Scale Sets
+----
+== Packer
+
+[Packer](https://www.packer.io/) is a tool developed by Hashicorp to automate the creation of any type of machine/golden images in a variety of infrastructure providers.
+
+It follows an Infrastructure as Code design pattern that allows developers to write a simple json file describing the target machine image.
+
+In this implementation, Packer is used to create an AWS NGINX Plus AMI and an AWS NGINX OSS AMI.
+
+== Terraform
+
+[Terraform](https://www.terraform.io/) is a tool developed by Hashicorp to write, plan, and create infrastructure on a variety of infrastructure providers.
+
+It follows an Infrastructure as Code design pattern that allows developers to write a simple Terraform configuration file describing the target infrastructure details.
+
+In this implementation, Terraform is used to create a set of AWS EC2 instances and configure NGINX as necessary using AWS EC2 user-data.
+
+Additionally, a new set of networking rules and security group settings are created to avoid conflicts with any pre-existing network settings.
+
+== Prerequisites and Required AWS configuration
+
+The instructions assume you have the following:
+****
+ *   An AWS account with the AWS Key access and secret
+ *   An NGINX Plus subscription.
+ *   Familiarity with NGINX configuration syntax.
+ *   Familiarity with Ansible and SSH host key manipulation to allow password-less connection
+****
+
+
+== Setup
+
+===  [Install](https://www.packer.io/intro/getting-started/install.html) Packer.
+    *   The minimum version of Packer required is **Packer v1.5.0** and as such might not work if a different version of Packer is employed. We will strive to update the code if any breaking changes are introduced in a future release of Packer.
+===  [Install](https://www.terraform.io/intro/getting-started/install.html) Terraform.
+    *   The minimum version of Terraform required is **Terraform v0.12.0** and as such might not work if a different version of Terraform is employed. We will strive to update the code if any breaking changes are introduced in a future release of Terraform.
+===  Install AWS CLI on your system
+    Here is how to do this on OSX
+    https://docs.aws.amazon.com/cli/latest/userguide/install-macos.html
+
+===  Set your AWS credentials:
+
+To facilitate the setup built stage, the credentials need to be centralized in /var/lib/secrets/ in your system
+
+The folder ansible/secrets is sym linked to /var/lib/secrets
+
+
+You put here your NGINX Plus subscription files
+
+----
+        /var/lib/secrets/Nginx-cert/Nginx-repo.crt
+        /var/lib/secrets/Nginx-cert/Nginx-repo.key
+----
+
+This file store the AWS credentials
+
+----
+        /var/lib/secrets/aws_config.yaml
+----
+
+with the structure below
+
+----
+              ---
+              secrets:
+                aws_access_key:   <your key>
+                aws_secret_key:   <your key>
+                aws_account_id:   <your ID>
+              ...
+----
+
+===  Lab customization
+You can choose the AWS region, AWS key pairs, and the AWS instance type for all the NGINX instance deployed
+Those variable are accessible here :
+
+----
+        ansible/vars.yaml
+----
+
+===  You can now deploy the lab with
+
+----
+    ansible-playbook aws_setup.yaml
+----
+
+===  Once the Lab deployed (10 to 15 minutes) you will have to update your local hosts file with the entry below
+
+----
+    x.x.x.x appone.Nginxlab.fr apptwo.Nginxlab.fr appthree.Nginxlab.fr
+----
+
+    x.x.x.x is the IP @ used by the AWS NLB, you will obtain this one via the AWS console
+
+===  Playing with the demo
+
+Use your browser to https://appone.Nginxlab.fr and https://apptwo.Nginxlab.fr
+
+https://appthree.Nginxlab.fr is NOT WORKING yet as you need to provision the SNI map table in the NGINX Plus cluster configuration
+
+We are going to use Ansible to push the new configuration quickly on the 2 member of the NGINX Plus cluster
+
+=== NGINX Plus configuration change with Ansible:
+Some manual action are required here:
+
+-Update your local Ansible inventory with the two public IP addresses of the NGINX Plus instances deployed on AWS
+
+Your inventory ==> /hosts.yaml
+
+----
+      all:
+        vars:
+          ansible_python_interpreter: /usr/bin/python3
+      aws_demo_nlb_lb:
+        hosts:
+          ng1:
+            ansible_host: ng1
+            ansible_user: ec2-user
+            ansible_port: 22
+          ng2:
+            ansible_host: ng2
+            ansible_user: ec2-user
+            ansible_port: 22
+----
+
+connect manually ssh to ng1 and ng2 by using your AWS private key
+
+You can now Push the new configuration of the NGINX Plus cluster with
+
+----
+        ansible-playbook 3_app.yaml
+----
+
+You can manually ssh to ec2-user@ng1 to check the NGINX configuration running with `Nginx -T`
+
+you should see a stream config like this
+
+----
+        map $ssl_preread_server_name $targetBackend {
+          appone.Nginxlab.fr  app_one;
+          apptwo.Nginxlab.fr  app_two;
+          appthree.Nginxlab.fr  app_three;
+        }
+
+        upstream app_one {
+          hash $remote_addr consistent;
+          zone app_one 64k;
+          state /var/lib/Nginx/state/app_one.conf;
+        }
+
+        upstream app_two {
+          hash $remote_addr consistent;
+          zone app_two 64k;
+          state /var/lib/Nginx/state/app_two.conf;
+        }
+
+        upstream app_three {
+          hash $remote_addr consistent;
+          zone app_one 64k;
+          state /var/lib/Nginx/state/app_three.conf;
+        }
+
+        server {
+          listen 443;
+
+          proxy_connect_timeout 1s;
+          proxy_timeout 3s;
+          proxy_pass $targetBackend;
+
+          ssl_preread on;
+        }
+----
+
+You can now check that https://appthree.Nginxlab.fr is working !
+
+===  Upcoming improvements:
+****
+ *letsencrypt integration for certificate
+ *AWS Route 53
+****

@@ -1,0 +1,15 @@
+---
+ws:
+
+  aws_access_key: "{{ secrets.aws_access_key }}"
+  aws_secret_key: "{{ secrets.aws_secret_key }}"
+  aws_account_id: "{{ secrets.aws_account_id }}"
+
+
+  ec2:
+
+    region: eu-west-3
+    key_name: Jacques
+    machines:
+      ngx:
+        type: t2.micro

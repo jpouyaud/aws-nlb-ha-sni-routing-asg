@@ -1,0 +1,24 @@
+- hosts: aws_demo_nlb_lb
+  become: yes
+  tasks:
+    - name: Copy stream_v1
+      copy:
+        src: "{{ playbook_dir }}/conf/stream_v1.conf"
+        dest: /etc/nginx/conf.d/stream/stream.conf
+        owner: root
+
+    - name: Copy config_v1.yaml
+      copy:
+        src: "{{ playbook_dir }}/conf/config_v1.yaml"
+        dest: /etc/nginx/config.yaml
+        owner: root
+
+    - name: restart nginx
+      service:
+        name: nginx
+        state: restarted
+
+    - name: restart nginx-asg-sync
+      service:
+        name: nginx-asg-sync
+        state: restarted

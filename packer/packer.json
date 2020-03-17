@@ -1,0 +1,160 @@
+{
+  "description": "Create an NGINX Plus and two NGINX Open Source Images",
+  "variables": {
+    "lab_path": "{{env `LAB_PATH`}}",
+    "aws_access_key": "{{env `AWS_ACCESS_KEY`}}",
+    "aws_secret_key": "{{env `AWS_SECRET_KEY`}}",
+    "region": "{{env `AWS_REGION`}}",
+    "ngx_instance_type": "{{env `NGX`}}"
+  },
+  "builders": [
+    {
+      "type": "amazon-ebs",
+      "name": "ngx-plus",
+      "ami_name": "ngx-plus {{isotime \"2006-01-02\"}}",
+      "instance_type": "{{user `ngx_instance_type`}}",
+      "region": "{{user `region`}}",
+      "source_ami": "ami-00d40e7e1502b404e",
+      "ssh_username": "ec2-user",
+      "access_key": "{{user `aws_access_key`}}",
+      "secret_key": "{{user `aws_secret_key`}}",
+      "tags": {
+        "Name": "ngx-plus"
+      }
+    },
+    {
+      "type": "amazon-ebs",
+      "name": "ngx-oss",
+      "ami_name": "ngx-oss {{isotime \"2006-01-02\"}}",
+      "instance_type": "{{user `ngx_instance_type`}}",
+      "region": "{{user `region`}}",
+      "source_ami": "ami-0e7b174cb08402f15",
+      "ssh_username": "ubuntu",
+      "access_key": "{{user `aws_access_key`}}",
+      "secret_key": "{{user `aws_secret_key`}}",
+      "tags": {
+        "Name": "ngx-oss"
+      }
+    }
+  ],
+  "provisioners": [
+    {
+      "type": "file",
+      "source": "{{user `lab_path`}}/ansible/secrets/nginx-cert",
+      "destination": "~/.ssh/ngx-certs",
+      "only": [
+        "ngx-plus"
+      ]
+    },
+    {
+      "type": "file",
+      "source": "{{user `lab_path`}}/certificate/wildcard-nginxlab-selfsigned.crt",
+      "destination": "~/wildcard-nginxlab-selfsigned.crt",
+      "only": [
+        "ngx-oss"
+      ]
+    },
+    {
+      "type": "file",
+      "source": "{{user `lab_path`}}/certificate/wildcard-nginxlab-selfsigned.key",
+      "destination": "~/wildcard-nginxlab-selfsigned.key",
+      "only": [
+        "ngx-oss"
+      ]
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "sudo cp wildcard-nginxlab-selfsigned.crt /etc/ssl/certs/",
+        "sudo cp wildcard-nginxlab-selfsigned.key /etc/ssl/private/",
+        "sudo chmod 400 /etc/ssl/private/wildcard-nginxlab-selfsigned.key"
+      ],
+      "only": [
+        "ngx-oss"
+      ]
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "sudo yum update -y",
+        "sudo yum install python-pip -y",
+        "sudo yum install python3.i686 -y",
+        "sudo pip install ansible"
+      ],
+      "only": [
+        "ngx-plus"
+      ]
+    },
+    {
+      "type": "ansible-local",
+      "galaxy_file": "requirements.yml",
+      "playbook_file": "playbook-lb.yml",
+      "only": [
+        "ngx-plus"
+      ]
+    },
+    {
+      "type": "file",
+      "source": "{{user `lab_path`}}/conf/nginx.conf",
+      "destination": "~/nginx.conf",
+      "only": [
+        "ngx-plus"
+      ]
+    },
+    {
+      "type": "file",
+      "source": "{{user `lab_path`}}/conf/stream_v1.conf",
+      "destination": "~/stream.conf",
+      "only": [
+        "ngx-plus"
+      ]
+    },
+    {
+      "type": "file",
+      "source": "{{user `lab_path`}}/conf/default.conf",
+      "destination": "~/default.conf",
+      "only": [
+        "ngx-plus"
+      ]
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "sudo mkdir /etc/nginx/conf.d/stream/",
+        "sudo mv default.conf /etc/nginx/conf.d/",
+        "sudo mv nginx.conf /etc/nginx/",
+        "sudo mv stream.conf /etc/nginx/conf.d/stream/"
+      ],
+      "only": [
+        "ngx-plus"
+      ]
+    },
+    {
+      "type": "shell",
+      "script": "setup-instance.sh",
+      "only": [
+        "ngx-plus"
+      ]
+    },
+    {
+      "type": "shell",
+      "inline": [
+        "sleep 60",
+        "sudo apt update",
+        "sudo apt install python-pip -y",
+        "sudo pip install ansible"
+      ],
+      "only": [
+        "ngx-oss"
+      ]
+    },
+    {
+      "type": "ansible-local",
+      "galaxy_file": "requirements.yml",
+      "playbook_file": "playbook-app.yml",
+      "only": [
+        "ngx-oss"
+      ]
+    }
+  ]
+}
