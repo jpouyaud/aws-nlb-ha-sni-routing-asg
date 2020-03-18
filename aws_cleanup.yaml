@@ -12,6 +12,7 @@
 
   - name: Launch cleanup.sh script
     script: "{{ playbook_dir }}/script/cleanup.sh"
+    register: out
 
     environment:
       AWS_ACCESS_KEY_ID: "{{ ws.aws_access_key }}"

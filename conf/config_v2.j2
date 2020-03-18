@@ -4,7 +4,7 @@ sync_interval_in_seconds: 1
 cloud_provider: AWS
 upstreams:
   - name: app_one
-    autoscaling_group: ngx-oss-one-autoscaling
+    autoscaling_group: nginxlab-ngx-oss-one-autoscaling
     port: 443
     kind: stream
     max_conns: 0
@@ -12,7 +12,7 @@ upstreams:
     fail_timeout: 10s
     slow_start: 0s
   - name: app_two
-    autoscaling_group: ngx-oss-two-autoscaling
+    autoscaling_group: nginxlab-ngx-oss-two-autoscaling
     port: 443
     kind: stream
     max_conns: 0
@@ -20,7 +20,7 @@ upstreams:
     fail_timeout: 10s
     slow_start: 0s
   - name: app_three
-    autoscaling_group: ngx-oss-three-autoscaling
+    autoscaling_group: nginxlab-ngx-oss-three-autoscaling
     port: 443
     kind: stream
     max_conns: 0

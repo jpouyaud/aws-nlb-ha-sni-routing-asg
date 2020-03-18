@@ -3,7 +3,7 @@ resource "aws_vpc" "main" {
   cidr_block           = "10.0.0.0/16"
   enable_dns_hostnames = true
   tags = {
-    Name = "aws-nlb-vpc"
+    Name = "nginxlab-aws-nlb-vpc"
   }
 }
 
@@ -13,17 +13,17 @@ resource "aws_subnet" "main" {
   cidr_block              = "10.0.0.0/24"
   map_public_ip_on_launch = true
   tags = {
-    Name = "aws-nlb-subnet"
+    Name = "nginxlab-aws-nlb-subnet"
   }
 }
 
 # Create AWS security group
 resource "aws_security_group" "main" {
-  name        = "aws-nlb-sec-grp"
+  name        = "nginxlab-aws-nlb-sec-grp"
   description = "Security group for AWS NLB"
   vpc_id      = aws_vpc.main.id
   tags = {
-    Name = "aws-nlb-sec-grp"
+    Name = "nginxlab-aws-nlb-sec-grp"
   }
   ingress {
     from_port = 80
@@ -79,7 +79,7 @@ resource "aws_security_group" "main" {
 resource "aws_internet_gateway" "main" {
   vpc_id = aws_vpc.main.id
   tags = {
-    Name = "aws-nlb-gtwy"
+    Name = "nginxlab-aws-nlb-gtwy"
   }
 }
 

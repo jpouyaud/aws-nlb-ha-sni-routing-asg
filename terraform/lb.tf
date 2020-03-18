@@ -1,6 +1,6 @@
 # Create AWS NLB
 resource "aws_lb" "main" {
-  name               = "aws-nlb-lb"
+  name               = "nginxlab-aws-nlb-lb"
   load_balancer_type = "network"
   subnets = [
     aws_subnet.main.id,
@@ -9,7 +9,7 @@ resource "aws_lb" "main" {
 
 # Create AWS NLB target group
 resource "aws_lb_target_group" "main" {
-  name     = "aws-nlb-lb-tg"
+  name     = "nginxlab-aws-nlb-lb-tg"
   port     = 443
   protocol = "TCP"
   vpc_id   = aws_vpc.main.id

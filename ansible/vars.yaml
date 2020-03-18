@@ -8,8 +8,8 @@ ws:
 
   ec2:
 
-    region: eu-west-3
-    key_name: <the name of your AWS key pair>
+    region: <Your AWS Region>
+    key_name: <Your AWS Key Pair for this AWS region>
     machines:
       ngx:
         type: t2.micro

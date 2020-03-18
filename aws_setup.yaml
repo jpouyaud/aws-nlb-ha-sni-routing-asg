@@ -39,6 +39,7 @@
 
   - name: Launch setup.sh script
     script: "{{ playbook_dir }}/script/setup.sh"
+    register: out
 
     environment:
       AWS_ACCESS_KEY_ID: "{{ ws.aws_access_key }}"

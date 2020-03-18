@@ -1,6 +1,6 @@
 # Create an autoscaling group for the NGINX Plus load balancer instances
 resource "aws_autoscaling_group" "ngx_plus" {
-  name                 = "ngx-plus-autoscaling"
+  name                 = "nginxlab-ngx-plus-autoscaling"
   min_size             = 2
   max_size             = 2
   launch_configuration = aws_launch_configuration.ngx_plus.name
@@ -26,7 +26,7 @@ resource "aws_autoscaling_group" "ngx_plus" {
 
 # Create an autoscaling group for the NGINX app 1 instances
 resource "aws_autoscaling_group" "ngx_oss_one" {
-  name                 = "ngx-oss-one-autoscaling"
+  name                 = "nginxlab-ngx-oss-one-autoscaling"
   min_size             = 2
   max_size             = 10
   launch_configuration = aws_launch_configuration.ngx_oss_one.name
@@ -49,7 +49,7 @@ resource "aws_autoscaling_group" "ngx_oss_one" {
 
 # Create an autoscaling group for the NGINX app 2 instances
 resource "aws_autoscaling_group" "ngx_oss_two" {
-  name                 = "ngx-oss-two-autoscaling"
+  name                 = "nginxlab-ngx-oss-two-autoscaling"
   min_size             = 2
   max_size             = 10
   launch_configuration = aws_launch_configuration.ngx_oss_two.name
@@ -72,7 +72,7 @@ resource "aws_autoscaling_group" "ngx_oss_two" {
 
 # Create an autoscaling group for the NGINX app 3 instances
 resource "aws_autoscaling_group" "ngx_oss_three" {
-  name                 = "ngx-oss-three-autoscaling"
+  name                 = "nginxlab-ngx-oss-three-autoscaling"
   min_size             = 2
   max_size             = 10
   launch_configuration = aws_launch_configuration.ngx_oss_three.name
