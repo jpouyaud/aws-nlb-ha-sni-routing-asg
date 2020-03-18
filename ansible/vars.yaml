@@ -9,7 +9,7 @@ ws:
   ec2:
 
     region: eu-west-3
-    key_name: Jacques
+    key_name: <the name of your AWS key pair>
     machines:
       ngx:
         type: t2.micro
