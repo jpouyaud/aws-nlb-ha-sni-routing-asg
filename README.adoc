@@ -26,8 +26,8 @@ SNI routing means the NGINX Plus look at the SNI information given at the SSL se
 Based on this information NGINX route the SSL session following the mapping below:
 ----
   SNI appone.Nginxlab.fr ==> App_One Nginx OSS cluster
-  SNI apptwo.Nginxlab.fr ==> App_One Nginx OSS cluster
-  SNI appthree.Nginxlab.fr ==> App_One Nginx OSS cluster
+  SNI apptwo.Nginxlab.fr ==> App_Two Nginx OSS cluster
+  SNI appthree.Nginxlab.fr ==> App_Three Nginx OSS cluster
 ----
 
 NGINX Plus allow to workaround the current AWS limitation of 25 Certificate per LB
